@@ -69,5 +69,5 @@ function doPost(e) {
 }
 
 function doGet() {
-  return ContentService.createTextOutput("كَوادر النقل — endpoint يعمل ✓");
+  return ContentService.createTextOutput("المجال.كوم — endpoint يعمل ✓");
 }

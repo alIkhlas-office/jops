@@ -139,7 +139,7 @@
   document.getElementById("formSubtitle").textContent = cfg.subtitle;
   document.getElementById("formBadge").textContent = cfg.badge;
   document.getElementById("roleField").value = jos;
-  document.title = cfg.title + " — كَوادر النقل";
+  document.title = cfg.title + " — المجال.كوم";
 
   // بناء الحقول
   const fieldsWrap = document.getElementById("fields");

@@ -133,11 +133,10 @@
           { v: "ديليفري عام", t: "ديليفري عام" },
           { v: "أخرى", t: "أخرى" },
         ]},
-        { name: "education", label: "المؤهل الدراسي", type: "select", options: [
-          { v: "ابتدائي / إعدادي", t: "ابتدائي / إعدادي" },
-          { v: "ثانوي / دبلوم", t: "ثانوي / دبلوم" },
-          { v: "جامعي", t: "جامعي" },
-          { v: "عالي", t: "دراسات عليا" },
+        { name: "education", label: "المؤهل الدراسي", type: "select", required: true, options: educationOptions },
+        { name: "is_literate", label: "هل تجيد القراءة والكتابة؟", type: "select", showIfEducationLow: true, options: [
+          { v: "نعم", t: "نعم، أجيد القراءة والكتابة" },
+          { v: "لا",  t: "لا" },
         ]},
         { name: "availability", label: "نوع العمل المطلوب", type: "select", required: true, options: [
           { v: "دوام كامل", t: "دوام كامل" },

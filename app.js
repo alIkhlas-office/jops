@@ -11,6 +11,17 @@
   const GOVS = ["القاهرة","الجيزة","الإسكندرية","القليوبية","الدقهلية","الشرقية","الغربية","المنوفية","البحيرة","كفر الشيخ","دمياط","بورسعيد","الإسماعيلية","السويس","المنيا","أسيوط","سوهاج","قنا","الأقصر","أسوان","الفيوم","بني سويف","مطروح","شمال سيناء","جنوب سيناء","البحر الأحمر","الوادي الجديد"];
 
   const govOptions = GOVS.map(g => ({ v: g, t: g }));
+  const educationOptions = [
+    { v: "بدون مؤهل", t: "بدون مؤهل / لم يلتحق بمدرسة" },
+    { v: "ابتدائي",   t: "ابتدائي" },
+    { v: "إعدادي",    t: "إعدادي" },
+    { v: "ثانوي",     t: "ثانوي / دبلوم متوسط" },
+    { v: "دبلوم",     t: "دبلوم فني" },
+    { v: "جامعي",     t: "جامعي / بكالوريوس" },
+    { v: "عالي",      t: "دراسات عليا" },
+  ];
+  // Trigger literacy follow-up only for very low education levels.
+  const EDUCATION_LOW = ["بدون مؤهل", "ابتدائي"];
 
   // تعريف النماذج لكل صفة
   const FORMS = {
@@ -52,6 +63,11 @@
         ]},
         { name: "current_salary", label: "الراتب الحالي (جنيه/شهريًا)", type: "number", min: 0, ph: "مثال: 6000", hint: "اتركه فارغًا إن كنت لا تعمل حاليًا" },
         { name: "expected_salary", label: "الراتب المتوقع (جنيه/شهريًا)", type: "number", required: true, min: 0, ph: "مثال: 9000" },
+        { name: "education", label: "المؤهل الدراسي", type: "select", required: true, options: educationOptions },
+        { name: "is_literate", label: "هل تجيد القراءة والكتابة؟", type: "select", showIfEducationLow: true, options: [
+          { v: "نعم", t: "نعم، أجيد القراءة والكتابة" },
+          { v: "لا",  t: "لا" },
+        ]},
         { name: "notes", label: "ملاحظات إضافية", type: "textarea", full: true, ph: "أي تفاصيل تريد إضافتها..." },
       ],
     },
@@ -88,6 +104,11 @@
         ]},
         { name: "current_income", label: "الدخل الحالي من المركبة (جنيه/شهريًا)", type: "number", min: 0, ph: "مثال: 8000", hint: "اتركه فارغًا إن لم تكن تشغّلها حاليًا" },
         { name: "expected_income", label: "الدخل المتوقع (جنيه/شهريًا)", type: "number", required: true, min: 0, ph: "مثال: 12000" },
+        { name: "education", label: "المؤهل الدراسي", type: "select", required: true, options: educationOptions },
+        { name: "is_literate", label: "هل تجيد القراءة والكتابة؟", type: "select", showIfEducationLow: true, options: [
+          { v: "نعم", t: "نعم، أجيد القراءة والكتابة" },
+          { v: "لا",  t: "لا" },
+        ]},
         { name: "notes", label: "ملاحظات إضافية", type: "textarea", full: true, ph: "حالة المركبة، أي تفاصيل إضافية..." },
       ],
     },
@@ -209,6 +230,11 @@
   cfg.fields.forEach(f => {
     const wrap = document.createElement("div");
     wrap.className = "field" + (f.full || f.type === "textarea" ? " full" : "");
+    // Hide literacy field until education is set to a low level.
+    if (f.showIfEducationLow) {
+      wrap.style.display = "none";
+      wrap.dataset.literacyField = "1";
+    }
 
     const label = document.createElement("label");
     label.setAttribute("for", f.name);
@@ -250,6 +276,22 @@
     }
     fieldsWrap.appendChild(wrap);
   });
+
+  // Conditional: show literacy question only when education is "بدون مؤهل" or "ابتدائي"
+  const eduSelect = fieldsWrap.querySelector('[name="education"]');
+  const litWrap   = fieldsWrap.querySelector('[data-literacy-field]');
+  if (eduSelect && litWrap) {
+    const toggleLiteracy = () => {
+      const show = EDUCATION_LOW.includes(eduSelect.value);
+      litWrap.style.display = show ? "" : "none";
+      const litInput = litWrap.querySelector('select');
+      if (litInput) {
+        if (!show) litInput.value = "";
+        litInput.required = show;
+      }
+    };
+    eduSelect.addEventListener("change", toggleLiteracy);
+  }
 
   // الإرسال
   const form = document.getElementById("dataForm");

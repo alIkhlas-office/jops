@@ -84,7 +84,8 @@
     .section-head h2 { font-size: clamp(1.5rem, 3vw, 2.1rem); font-weight: 900; margin-top: 8px; color: var(--navy); }
     .section-head p { color: var(--muted); margin-top: 12px; }
 
-    .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+    .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; }
+    @media (max-width: 1024px) { .cards { grid-template-columns: repeat(2, 1fr); } }
     .card {
       background: #fff; border: 1px solid var(--line); border-radius: var(--radius);
       padding: 30px 26px; text-align: center; transition: transform .18s ease, box-shadow .18s ease, border-color .18s;
@@ -226,6 +227,12 @@
             <a class="btn btn-block" href="?jos=owner_car">سجّل كـ صاحب مركبة</a>
           </div>
           <div class="card">
+            <div class="ic">🛵</div>
+            <h3>مندوب</h3>
+            <p>مندوب توصيل أو مبيعات أو تحصيل؟ سجّل بياناتك وفرص الشركات تجيلك.</p>
+            <a class="btn btn-block" href="?jos=sales_rep">سجّل كـ مندوب</a>
+          </div>
+          <div class="card">
             <div class="ic">🏢</div>
             <h3>شركة</h3>
             <p>شركتك تحتاج سائقين أو مركبات بشكل دائم؟ أخبرنا باحتياجك.</p>
@@ -284,7 +291,7 @@
     </div>
   </footer>
 
-  <script src="config.js?v=5"></script>
-  <script src="app.js?v=5"></script>
+  <script src="config.js?v=8"></script>
+  <script src="app.js?v=8"></script>
 </body>
 </html>

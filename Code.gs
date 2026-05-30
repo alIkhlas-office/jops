@@ -17,6 +17,7 @@ function doPost(e) {
     var tabNames = {
       driver: "السائقون",
       owner_car: "أصحاب المركبات",
+      sales_rep: "المناديب",
       company: "الشركات"
     };
     var tabName = tabNames[role] || "أخرى";

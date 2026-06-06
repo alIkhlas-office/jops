@@ -33,7 +33,7 @@
         { name: "full_name", label: "الاسم بالكامل", type: "text", required: true, ph: "مثال: محمد أحمد علي" },
         { name: "phone", label: "رقم الموبايل", type: "tel", required: true, ph: "01xxxxxxxxx", pattern: "01[0-9]{9}", hint: "رقم مصري مكوّن من 11 رقم" },
         { name: "whatsapp", label: "رقم واتساب (إن وجد)", type: "tel", ph: "01xxxxxxxxx" },
-        { name: "governorate", label: "المحافظة", type: "select", required: true, options: govOptions },
+        { type: "location", required: true },
         { name: "age", label: "السن", type: "number", min: 18, max: 70, ph: "مثال: 32" },
         { name: "license_type", label: "نوع الرخصة", type: "select", required: true, options: [
           { v: "خاصة", t: "خاصة" },
@@ -80,7 +80,7 @@
         { name: "full_name", label: "الاسم بالكامل", type: "text", required: true, ph: "مثال: أحمد محمود" },
         { name: "phone", label: "رقم الموبايل", type: "tel", required: true, ph: "01xxxxxxxxx", pattern: "01[0-9]{9}" },
         { name: "whatsapp", label: "رقم واتساب (إن وجد)", type: "tel", ph: "01xxxxxxxxx" },
-        { name: "governorate", label: "المحافظة", type: "select", required: true, options: govOptions },
+        { type: "location", required: true },
         { name: "vehicle_type", label: "نوع المركبة", type: "select", required: true, options: [
           { v: "ملاكي", t: "ملاكي" },
           { v: "ميكروباص", t: "ميكروباص" },
@@ -121,7 +121,7 @@
         { name: "full_name", label: "الاسم بالكامل", type: "text", required: true, ph: "مثال: محمد أحمد علي" },
         { name: "phone", label: "رقم الموبايل", type: "tel", required: true, ph: "01xxxxxxxxx", pattern: "01[0-9]{9}" },
         { name: "whatsapp", label: "رقم واتساب (إن وجد)", type: "tel", ph: "01xxxxxxxxx" },
-        { name: "governorate", label: "المحافظة", type: "select", required: true, options: govOptions },
+        { type: "location", required: true },
         { name: "current_address", label: "مكان الإقامة الحالي", type: "text", required: true, ph: "مثال: المنيب — شارع كذا" },
         { name: "age", label: "السن", type: "number", min: 18, max: 60, ph: "مثال: 25" },
         { name: "rep_mode", label: "تعمل كـ مندوب…", type: "select", required: true, options: [
@@ -180,7 +180,7 @@
         { name: "contact_person", label: "اسم المسؤول", type: "text", required: true, ph: "الاسم بالكامل" },
         { name: "phone", label: "رقم الموبايل", type: "tel", required: true, ph: "01xxxxxxxxx", pattern: "01[0-9]{9}" },
         { name: "email", label: "البريد الإلكتروني", type: "email", ph: "name@company.com" },
-        { name: "governorate", label: "المحافظة", type: "select", required: true, options: govOptions },
+        { type: "location", required: true },
         { name: "activity", label: "نشاط الشركة", type: "select", required: true, options: [
           { v: "نقل بضائع", t: "نقل بضائع ولوجستيات" },
           { v: "نقل ركاب", t: "نقل ركاب" },
@@ -227,7 +227,67 @@
 
   // بناء الحقول
   const fieldsWrap = document.getElementById("fields");
+
+  // Helper: build one labeled <select> field wrapper.
+  function makeSelectField(name, labelText, required, optionList, phText) {
+    const wrap = document.createElement("div");
+    wrap.className = "field";
+    const label = document.createElement("label");
+    label.setAttribute("for", name);
+    label.innerHTML = labelText + (required ? ' <span class="req">*</span>' : "");
+    wrap.appendChild(label);
+    const sel = document.createElement("select");
+    sel.id = name; sel.name = name;
+    if (required) sel.required = true;
+    const ph = document.createElement("option");
+    ph.value = ""; ph.textContent = phText || "— اختر —";
+    sel.appendChild(ph);
+    (optionList || []).forEach(v => {
+      const opt = document.createElement("option");
+      opt.value = v; opt.textContent = v;
+      sel.appendChild(opt);
+    });
+    wrap.appendChild(sel);
+    fieldsWrap.appendChild(wrap);
+    return sel;
+  }
+
+  // Cascading country → governorate → city, sourced from the database export.
+  function buildLocationFields(required) {
+    const L = window.LOCATIONS || { countries: [], govs: {}, cities: {} };
+    const countrySel = makeSelectField("country", "الدولة", required, L.countries, "— اختر الدولة —");
+    const govSel     = makeSelectField("governorate", "المحافظة / المنطقة", required, [], "— اختر المحافظة —");
+    const citySel    = makeSelectField("city", "المدينة", false, [], "— اختر المدينة (اختياري) —");
+
+    function fill(sel, list, phText) {
+      sel.innerHTML = "";
+      const ph = document.createElement("option");
+      ph.value = ""; ph.textContent = phText;
+      sel.appendChild(ph);
+      (list || []).forEach(v => {
+        const opt = document.createElement("option");
+        opt.value = v; opt.textContent = v;
+        sel.appendChild(opt);
+      });
+    }
+
+    countrySel.addEventListener("change", () => {
+      fill(govSel, L.govs[countrySel.value] || [], "— اختر المحافظة —");
+      fill(citySel, [], "— اختر المدينة (اختياري) —");
+    });
+    govSel.addEventListener("change", () => {
+      fill(citySel, L.cities[govSel.value] || [], "— اختر المدينة (اختياري) —");
+    });
+
+    // Default to Egypt and pre-populate its governorates.
+    if ((L.countries || []).indexOf("مصر") !== -1) {
+      countrySel.value = "مصر";
+      fill(govSel, L.govs["مصر"] || [], "— اختر المحافظة —");
+    }
+  }
+
   cfg.fields.forEach(f => {
+    if (f.type === "location") { buildLocationFields(!!f.required); return; }
     const wrap = document.createElement("div");
     wrap.className = "field" + (f.full || f.type === "textarea" ? " full" : "");
     // Hide literacy field until education is set to a low level.

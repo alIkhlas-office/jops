@@ -113,6 +113,37 @@
       ],
     },
 
+    private_trip: {
+      title: "طلب مشوار خاص",
+      subtitle: "سجّل تفاصيل مشوارك وفريقنا يتواصل معك لترتيب السيارة والسعر.",
+      badge: "🚗 طلب مشوار خاص",
+      fields: [
+        { name: "full_name", label: "الاسم", type: "text", required: true, ph: "مثال: محمد أحمد" },
+        { name: "phone", label: "رقم الموبايل", type: "tel", required: true, ph: "01xxxxxxxxx", pattern: "01[0-9]{9}" },
+        { name: "whatsapp", label: "رقم واتساب (إن وجد)", type: "tel", ph: "01xxxxxxxxx" },
+        { type: "location", required: true },
+        { name: "pickup_location", label: "مكان الانطلاق (من)", type: "text", required: true, ph: "مثال: المعادي — شارع 9" },
+        { name: "dropoff_location", label: "الوجهة (إلى)", type: "text", required: true, ph: "مثال: مطار القاهرة" },
+        { name: "trip_type", label: "نوع المشوار", type: "select", required: true, options: [
+          { v: "ذهاب فقط", t: "ذهاب فقط" },
+          { v: "ذهاب وعودة", t: "ذهاب وعودة" },
+          { v: "بالساعة / تحت الطلب", t: "بالساعة / تحت الطلب" },
+          { v: "يومي / متكرر", t: "يومي / متكرر" },
+        ]},
+        { name: "trip_date", label: "تاريخ المشوار", type: "date", required: true },
+        { name: "trip_time", label: "الميعاد", type: "time" },
+        { name: "passengers", label: "عدد الركاب", type: "number", required: true, min: 1, max: 60, ph: "مثال: 3" },
+        { name: "car_type", label: "نوع السيارة المطلوبة", type: "select", required: true, options: [
+          { v: "ملاكي", t: "ملاكي (حتى 4 ركاب)" },
+          { v: "ميكروباص", t: "ميكروباص (حتى 14 راكب)" },
+          { v: "ميني باص / أتوبيس", t: "ميني باص / أتوبيس" },
+          { v: "فان / VIP", t: "فان / VIP" },
+          { v: "أي نوع مناسب", t: "أي نوع مناسب" },
+        ]},
+        { name: "notes", label: "ملاحظات إضافية", type: "textarea", full: true, ph: "أي تفاصيل: توقيتات، أمتعة، كرسي أطفال..." },
+      ],
+    },
+
     sales_rep: {
       title: "تسجيل بيانات مندوب",
       subtitle: "مندوب توصيل / مبيعات / تحصيل؟ سجّل بياناتك وفرص الشركات تجيلك.",
@@ -207,16 +238,19 @@
 
   const chooser = document.getElementById("chooser");
   const formSection = document.getElementById("form-section");
+  const promo = document.getElementById("private-trip-promo");
 
   if (!cfg) {
     // لا يوجد باراميتر صالح — اعرض الاختيار
     chooser.style.display = "";
+    if (promo) promo.style.display = "";
     formSection.style.display = "none";
     return;
   }
 
   // اعرض النموذج المناسب
   chooser.style.display = "none";
+  if (promo) promo.style.display = "none";
   formSection.style.display = "";
 
   document.getElementById("formTitle").textContent = cfg.title;

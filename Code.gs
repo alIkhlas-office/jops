@@ -17,7 +17,8 @@ var TAB_NAMES = {
   driver:     "السائقون",
   owner_car:  "أصحاب المركبات",
   sales_rep:  "المناديب",
-  company:    "الشركات"
+  company:    "الشركات",
+  private_trip: "مشاوير خاصة"
 };
 
 // Worker sheets that support hire tracking (companies excluded).

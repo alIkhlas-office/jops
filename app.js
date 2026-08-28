@@ -327,6 +327,30 @@
   }
 
   // Cascading country → governorate → city, sourced from the database export.
+  // Phone validation per country — the phone/whatsapp inputs adapt to the
+  // selected country so a Saudi number is accepted when السعودية is chosen, etc.
+  const PHONE_RULES = {
+    "مصر":      { pattern: "01[0-9]{9}", ph: "01xxxxxxxxx", hint: "رقم مصري — 11 رقم يبدأ بـ 01" },
+    "السعودية": { pattern: "05[0-9]{8}", ph: "05xxxxxxxx",  hint: "رقم سعودي — 10 أرقام يبدأ بـ 05" },
+  };
+
+  function applyPhoneRules(country) {
+    const rule = PHONE_RULES[country];
+    if (!rule) return;
+    ["phone", "whatsapp"].forEach(name => {
+      const input = fieldsWrap.querySelector('input[name="' + name + '"]');
+      if (!input) return;
+      input.pattern = rule.pattern;
+      input.placeholder = rule.ph;
+      input.title = rule.hint;                       // native validity tooltip
+      const wrap = input.closest(".field");
+      if (!wrap) return;
+      let hintEl = wrap.querySelector(".hint");
+      if (!hintEl) { hintEl = document.createElement("div"); hintEl.className = "hint"; wrap.appendChild(hintEl); }
+      hintEl.textContent = rule.hint;
+    });
+  }
+
   function buildLocationFields(required) {
     const L = window.LOCATIONS || { countries: [], govs: {}, cities: {} };
     const countrySel = makeSelectField("country", "الدولة", required, L.countries, "— اختر الدولة —");
@@ -348,6 +372,7 @@
     countrySel.addEventListener("change", () => {
       fill(govSel, L.govs[countrySel.value] || [], "— اختر المحافظة —");
       fill(citySel, [], "— اختر المدينة (اختياري) —");
+      applyPhoneRules(countrySel.value);
     });
     govSel.addEventListener("change", () => {
       fill(citySel, L.cities[govSel.value] || [], "— اختر المدينة (اختياري) —");
@@ -358,6 +383,7 @@
       countrySel.value = "مصر";
       fill(govSel, L.govs["مصر"] || [], "— اختر المحافظة —");
     }
+    applyPhoneRules(countrySel.value);   // set phone rule to the default country
   }
 
   cfg.fields.forEach(f => {
